@@ -79,11 +79,11 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
-/* added_by_safayat */
+/* ------------ added_by_safayat -------------------- */
 #include "nrf_temp.h"
 #include "ble_hts.h"
 #include "ble_bas.h"
-/*added_by_safayat */
+/* ------------ added_by_safayat -------------------- */
 
 
 #define APP_FEATURE_NOT_SUPPORTED       BLE_GATT_STATUS_ATTERR_APP_BEGIN + 2    /**< Reply when unsupported features are requested. */
@@ -132,13 +132,32 @@ static bool m_hts_meas_ind_conf_pending = false;
 volatile uint32_t hts_counter; // hold dummy hts data
 
 
-// Function declarations
-static void on_hts_evt(ble_hts_t * p_hts, ble_hts_evt_t * p_evt);
-static void temperature_measurement_send(void);
+// Function prototypes
 void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name);
 static void pm_evt_handler(pm_evt_t const * p_evt);
 static void timers_init(void);
-
+static void generate_temperature(ble_hts_meas_t * p_meas);
+static void gap_params_init(void);
+static void gatt_init(void);
+static void temperature_measurement_send(void);
+static void on_hts_evt(ble_hts_t * p_hts, ble_hts_evt_t * p_evt);
+static void services_init(void);
+static void on_conn_params_evt(ble_conn_params_evt_t * p_evt);
+static void conn_params_error_handler(uint32_t nrf_error);
+static void conn_params_init(void);
+static void application_timers_start(void);
+static void sleep_mode_enter(void);
+static void on_adv_evt(ble_adv_evt_t ble_adv_evt);
+static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context);
+static void ble_stack_init(void);
+static void peer_manager_init(void);
+static void delete_bonds(void);
+static void bsp_event_handler(bsp_event_t event);
+static void advertising_init(void);
+static void buttons_leds_init(bool * p_erase_bonds);
+static void log_init(void);
+static void power_manage(void);
+static void advertising_start(bool erase_bonds);
 
 /* ------------ added_by_safayat -------------------- */
 
@@ -159,13 +178,6 @@ static ble_uuid_t m_adv_uuids[] =                                               
     {BLE_UUID_BATTERY_SERVICE, BLE_UUID_TYPE_BLE},
     {BLE_UUID_DEVICE_INFORMATION_SERVICE, BLE_UUID_TYPE_BLE}
 };
-
-
-/* Function prototypes*/
-static void advertising_start(bool erase_bonds);
-
-
-
 
 
 
