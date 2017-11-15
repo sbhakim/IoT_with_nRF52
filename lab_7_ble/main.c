@@ -79,10 +79,16 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
+/* added_by_safayat */
+#include "nrf_temp.h"
+#include "ble_hts.h"
+#include "ble_bas.h"
+/*added_by_safayat */
+
 
 #define APP_FEATURE_NOT_SUPPORTED       BLE_GATT_STATUS_ATTERR_APP_BEGIN + 2    /**< Reply when unsupported features are requested. */
 
-#define DEVICE_NAME                     "Nordic_Template"                       /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "Nordic_HTM"                       /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "NordicSemiconductor"                   /**< Manufacturer. Will be passed to Device Information Service. */
 #define APP_ADV_INTERVAL                300                                     /**< The advertising interval (in units of 0.625 ms. This value corresponds to 187.5 ms). */
 #define APP_ADV_TIMEOUT_IN_SECONDS      180                                     /**< The advertising timeout in units of seconds. */
@@ -109,6 +115,23 @@
 #define SEC_PARAM_MAX_KEY_SIZE          16                                      /**< Maximum encryption key size. */
 
 #define DEAD_BEEF                       0xDEADBEEF                              /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
+
+
+/* ------------ added_by_safayat -------------------- */
+// Determines if temperature type is given as characteristic (1) or as a field of measurement (0)
+
+
+#define TEMP_TYPE_AS_CHARACTERISTIC     0
+
+BLE_HTS_DEF(m_hts); // Macro for defining a ble_hts instance
+BLE_BAS_DEF(m_bas); // Macro for defining a ble_bas instance
+// Flag to keep track of when an indication confirmation is pending
+static bool m_hts_meas_ind_conf_pending = false;
+volatile uint32_t hts_counter; // hold dummy hts data
+// Function declarations
+static void on_hts_evt(ble_hts_t * p_hts, ble_hts_evt_t * p_evt);
+static void temperature_measurement_send(void);
+/* ------------ added_by_safayat -------------------- */
 
 
 NRF_BLE_GATT_DEF(m_gatt);                                                       /**< GATT module instance. */
@@ -343,29 +366,42 @@ static void on_yys_evt(ble_yy_service_t     * p_yy_service,
  */
 static void services_init(void)
 {
-    /* YOUR_JOB: Add code to initialize the services used by the application.
-       ret_code_t                         err_code;
-       ble_xxs_init_t                     xxs_init;
-       ble_yys_init_t                     yys_init;
+    /* ------------ added_by_safayat --------------------*/
+    ret_code_t err_code;
+    ble_hts_init_t hts_init;
+    ble_bas_init_t bas_init;
+    
+    // Initialize Health Thermometer Service
+    memset(&hts_init, 0, sizeof(hts_init));
+    
+    hts_init.evt_handler = on_hts_evt;
+    hts_init.temp_type_as_characteristic = TEMP_TYPE_AS_CHARACTERISTIC;
+    hts_init.temp_type = BLE_HTS_TEMP_TYPE_BODY;
+    
+    // Here the sec level for the Health Thermometer Service can be changed/increased.
+    BLE_GAP_CONN_SEC_MODE_SET_ENC_NO_MITM(&hts_init.hts_meas_attr_md.cccd_write_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&hts_init.hts_meas_attr_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&hts_init.hts_meas_attr_md.write_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&hts_init.hts_temp_type_attr_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&hts_init.hts_temp_type_attr_md.write_perm);
+    
+    err_code = ble_hts_init(&m_hts, &hts_init);
+    APP_ERROR_CHECK(err_code);
+    // Initialize Battery Service.
+    memset(&bas_init, 0, sizeof(bas_init));
+    // Here the sec level for the Battery Service can be changed/increased.
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bas_init.battery_level_char_attr_md.cccd_write_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bas_init.battery_level_char_attr_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&bas_init.battery_level_char_attr_md.write_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bas_init.battery_level_report_read_perm);
+    bas_init.evt_handler = NULL;
+    bas_init.support_notification = true;
+    bas_init.p_report_ref = NULL;
+    bas_init.initial_batt_level = 100;
+    err_code = ble_bas_init(&m_bas, &bas_init);
+    APP_ERROR_CHECK(err_code);
 
-       // Initialize XXX Service.
-       memset(&xxs_init, 0, sizeof(xxs_init));
-
-       xxs_init.evt_handler                = NULL;
-       xxs_init.is_xxx_notify_supported    = true;
-       xxs_init.ble_xx_initial_value.level = 100;
-
-       err_code = ble_bas_init(&m_xxs, &xxs_init);
-       APP_ERROR_CHECK(err_code);
-
-       // Initialize YYY Service.
-       memset(&yys_init, 0, sizeof(yys_init));
-       yys_init.evt_handler                  = on_yys_evt;
-       yys_init.ble_yy_initial_value.counter = 0;
-
-       err_code = ble_yy_service_init(&yys_init, &yy_init);
-       APP_ERROR_CHECK(err_code);
-     */
+    /* ------------ added_by_safayat --------------------*/
 }
 
 
