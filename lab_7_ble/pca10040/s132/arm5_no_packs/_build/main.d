@@ -80,3 +80,7 @@
 .\_build\main.o: ..\..\..\..\..\..\components\libraries\experimental_memobj\nrf_memobj.h
 .\_build\main.o: ..\..\..\..\..\..\components\libraries\balloc\nrf_balloc.h
 .\_build\main.o: ..\..\..\..\..\..\components\libraries\experimental_log\nrf_log_default_backends.h
+.\_build\main.o: ..\..\..\..\..\..\components\drivers_nrf\hal\nrf_temp.h
+.\_build\main.o: ..\..\..\..\..\..\components\ble\ble_services\ble_hts\ble_hts.h
+.\_build\main.o: ..\..\..\..\..\..\components\ble\common\ble_date_time.h
+.\_build\main.o: ..\..\..\..\..\..\components\ble\ble_services\ble_bas\ble_bas.h

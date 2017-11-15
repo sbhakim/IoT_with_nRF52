@@ -88,7 +88,7 @@
 
 #define APP_FEATURE_NOT_SUPPORTED       BLE_GATT_STATUS_ATTERR_APP_BEGIN + 2    /**< Reply when unsupported features are requested. */
 
-#define DEVICE_NAME                     "Nordic_HTM"                       /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "Safayat_HTM"                       /**< Name of device. Will be included in the advertising data. */
 #define MANUFACTURER_NAME               "NordicSemiconductor"                   /**< Manufacturer. Will be passed to Device Information Service. */
 #define APP_ADV_INTERVAL                300                                     /**< The advertising interval (in units of 0.625 ms. This value corresponds to 187.5 ms). */
 #define APP_ADV_TIMEOUT_IN_SECONDS      180                                     /**< The advertising timeout in units of seconds. */
@@ -131,6 +131,11 @@ volatile uint32_t hts_counter; // hold dummy hts data
 // Function declarations
 static void on_hts_evt(ble_hts_t * p_hts, ble_hts_evt_t * p_evt);
 static void temperature_measurement_send(void);
+void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name);
+static void pm_evt_handler(pm_evt_t const * p_evt);
+static void timers_init(void);
+
+
 /* ------------ added_by_safayat -------------------- */
 
 
@@ -150,7 +155,12 @@ static ble_uuid_t m_adv_uuids[] =                                               
 };
 
 
+/* Function prototypes*/
 static void advertising_start(bool erase_bonds);
+
+
+
+
 
 
 /**@brief Callback function for asserts in the SoftDevice.
@@ -293,6 +303,44 @@ static void timers_init(void)
 }
 
 
+/* ------------ added_by_safayat -------------------- */
+
+/*
+* Function for generating a dummy temperature information packet.
+*/
+static void generate_temperature(ble_hts_meas_t * p_meas)
+{
+     static ble_date_time_t time_stamp = { 2017, 15, 11, 16, 15, 0 };
+
+    uint32_t celciusX100;
+
+    p_meas->temp_in_fahr_units = false;
+    p_meas->time_stamp_present = true;
+    p_meas->temp_type_present = (TEMP_TYPE_AS_CHARACTERISTIC ? false : true);
+    celciusX100 = 2000+hts_counter++; // one unit is 0.01 Celcius
+    p_meas->temp_in_celcius.exponent = -2;
+    p_meas->temp_in_celcius.mantissa = celciusX100;
+    p_meas->temp_in_fahr.exponent = -2;
+    p_meas->temp_in_fahr.mantissa = (32 * 100) + ((celciusX100 * 9) / 5);
+    p_meas->time_stamp = time_stamp;
+    p_meas->temp_type = BLE_HTS_TEMP_TYPE_FINGER;
+    // update simulated time stamp
+ 
+       time_stamp.seconds += 27;
+    if (time_stamp.seconds > 59)
+     {
+        time_stamp.seconds -= 60;
+        time_stamp.minutes++;
+         if (time_stamp.minutes > 59)
+         {
+             time_stamp.minutes = 0;
+        }
+    }
+}
+
+/* ------------ added_by_safayat -------------------- */
+
+
 /**@brief Function for the GAP initialization.
  *
  * @details This function sets up all the necessary GAP (Generic Access Profile) parameters of the
@@ -336,31 +384,59 @@ static void gatt_init(void)
 }
 
 
-/**@brief Function for handling the YYY Service events.
- * YOUR_JOB implement a service handler function depending on the event the service you are using can generate
- *
- * @details This function will be called for all YY Service events which are passed to
- *          the application.
- *
- * @param[in]   p_yy_service   YY Service structure.
- * @param[in]   p_evt          Event received from the YY Service.
- *
- *
-static void on_yys_evt(ble_yy_service_t     * p_yy_service,
-                       ble_yy_service_evt_t * p_evt)
-{
-    switch (p_evt->evt_type)
-    {
-        case BLE_YY_NAME_EVT_WRITE:
-            APPL_LOG("[APPL]: charact written with value %s. ", p_evt->params.char_xx.value.p_str);
-            break;
+/* ------------ added_by_safayat -------------------- */
 
+static void temperature_measurement_send(void)
+{
+ ble_hts_meas_t hts_meas; //Health Thermometer Service measurement structure
+ ret_code_t err_code;
+    if (!m_hts_meas_ind_conf_pending)
+    {
+        generate_temperature(&hts_meas);
+
+        err_code = ble_hts_measurement_send(&m_hts, &hts_meas);
+        
+        switch (err_code)
+        {
+             case NRF_SUCCESS:
+             // Measurement was successfully sent, wait for confirmation.
+                 m_hts_meas_ind_conf_pending = true;
+                 break;
+            
+             case NRF_ERROR_INVALID_STATE:
+            // Ignore error.
+                break;
+            
+            default:
+                APP_ERROR_HANDLER(err_code);
+                break;
+         }
+    }
+}
+
+
+/*
+* Function for handling the Health Thermometer Service events.
+*/
+static void on_hts_evt(ble_hts_t * p_hts, ble_hts_evt_t * p_evt)
+{
+     switch (p_evt->evt_type)
+    {
+        case BLE_HTS_EVT_INDICATION_ENABLED:
+            // Indication has been enabled, send a single temperature measurement
+            temperature_measurement_send();
+            break;
+        case BLE_HTS_EVT_INDICATION_CONFIRMED:
+            m_hts_meas_ind_conf_pending = false;
+            break;
         default:
             // No implementation needed.
             break;
-    }
+     }
 }
-*/
+
+
+/* ------------ added_by_safayat -------------------- */
 
 /**@brief Function for initializing services that will be used by the application.
  */
@@ -387,7 +463,11 @@ static void services_init(void)
     
     err_code = ble_hts_init(&m_hts, &hts_init);
     APP_ERROR_CHECK(err_code);
+    
+    
     // Initialize Battery Service.
+
+
     memset(&bas_init, 0, sizeof(bas_init));
     // Here the sec level for the Battery Service can be changed/increased.
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&bas_init.battery_level_char_attr_md.cccd_write_perm);
@@ -722,6 +802,17 @@ static void bsp_event_handler(bsp_event_t event)
                 }
             }
             break; // BSP_EVENT_KEY_0
+         
+            /* ------------ added_by_safayat --------------------*/
+
+        case BSP_EVENT_KEY_0:
+            if (m_conn_handle != BLE_CONN_HANDLE_INVALID)
+            {
+                temperature_measurement_send();
+            }
+            break;
+
+             /* ------------ added_by_safayat --------------------*/
 
         default:
             break;
