@@ -1,0 +1,99 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: µVision V5.24.2.0
+Copyright (C) 2017 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: Safayat Bin Hakim, KTH, LIC=----
+ 
+Tool Versions:
+Toolchain:       MDK-Lite  Version: 5.24.1
+Toolchain Path:  F:\Soft-Setup2017\Keilv5\ARM\ARMCC\Bin
+C Compiler:      Armcc.exe V5.06 update 5 (build 528)
+Assembler:       Armasm.exe V5.06 update 5 (build 528)
+Linker/Locator:  ArmLink.exe V5.06 update 5 (build 528)
+Library Manager: ArmAr.exe V5.06 update 5 (build 528)
+Hex Converter:   FromElf.exe V5.06 update 5 (build 528)
+CPU DLL:         
+Dialog DLL:      
+Target DLL:      Segger\JL2CM3.dll V2.99.26.0
+Dialog DLL:      TCM.DLL V1.32.0.0
+ 
+<h2>Project:</h2>
+F:\IoT Course\nRF5_SDK_11.0.0_89a8197\examples\ble_peripheral\lab_7_ble_hts\pca10040\s132\arm5_no_packs\ble_app_template_s132_pca10040.uvprojx
+Project File Date:  11/21/2017
+
+<h2>Output:</h2>
+*** Using Compiler 'V5.06 update 5 (build 528)', folder: 'F:\Soft-Setup2017\Keilv5\ARM\ARMCC\Bin'
+Rebuild target 'nrf52832_xxaa_s132'
+compiling ble_bas.c...
+compiling ble_hts.c...
+compiling main.c...
+..\..\..\main.c(105): error:  #260-D: explicit type is missing ("int" assumed)
+  BLE_HTS_DEF(m_hts); // Macro for defining a ble_hts instance
+..\..\..\main.c(105): error:  #92: identifier-list parameters may only be used in a function definition
+  BLE_HTS_DEF(m_hts); // Macro for defining a ble_hts instance
+..\..\..\main.c(106): error:  #260-D: explicit type is missing ("int" assumed)
+  BLE_BAS_DEF(m_bas); // Macro for defining a ble_bas instance
+..\..\..\main.c(106): error:  #92: identifier-list parameters may only be used in a function definition
+  BLE_BAS_DEF(m_bas); // Macro for defining a ble_bas instance
+..\..\..\main.c(276): error:  #20: identifier "m_hts" is undefined
+          err_code = ble_hts_measurement_send(&m_hts, &hts_meas);
+..\..\..\main.c(345): error:  #20: identifier "m_hts" is undefined
+          err_code = ble_hts_init(&m_hts, &hts_init);
+..\..\..\main.c(362): error:  #20: identifier "m_bas" is undefined
+          err_code = ble_bas_init(&m_bas, &bas_init);
+..\..\..\main.c: 0 warnings, 7 errors
+compiling bsp_btn_ble.c...
+compiling bsp.c...
+compiling ble_advdata.c...
+compiling ble_advertising.c...
+compiling ble_conn_params.c...
+compiling ble_srv_common.c...
+compiling app_uart.c...
+compiling nrf_delay.c...
+compiling device_manager_peripheral.c...
+compiling nrf_drv_common.c...
+compiling nrf_drv_gpiote.c...
+compiling nrf_drv_uart.c...
+compiling pstorage.c...
+compiling app_button.c...
+compiling app_error.c...
+compiling app_trace.c...
+compiling app_error_weak.c...
+compiling app_timer.c...
+compiling app_util_platform.c...
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                http://www.keil.com/pack/ARM.CMSIS.4.5.0.pack
+                ARM.CMSIS.4.5.0
+                CMSIS (Cortex Microcontroller Software Interface Standard)
+   * Component: CORE Version: 4.3.0
+
+Package Vendor: NordicSemiconductor
+                http://developer.nordicsemi.com/nRF5_SDK/pieces/nRF_DeviceFamilyPack/NordicSemiconductor.nRF_DeviceFamilyPack.8.5.0.pack
+                NordicSemiconductor.nRF_DeviceFamilyPack.8.5.0
+                Nordic Semiconductor nRF ARM devices Device Family Pack.
+   * Component: Startup Version: 8.5.0
+
+<h2>Collection of Component include folders:</h2>
+  .\RTE\_nrf52832_xxaa_s132
+  F:\Soft-Setup2017\Keilv5\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include
+  F:\Soft-Setup2017\Keilv5\ARM\PACK\NordicSemiconductor\nRF_DeviceFamilyPack\8.5.0\Device\Include
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: NordicSemiconductor::Device:Startup:8.5.0
+      Source file:   Device\Source\arm\arm_startup_nrf52.s
+      Source file:   Device\Source\system_nrf52.c
+      Include file:  Device\Include\system_nrf52.h
+
+   * Component: ARM::CMSIS:CORE:4.3.0
+Project build/rebuild aborted.
+Build Time Elapsed:  00:00:27
+</pre>
+</body>
+</html>
