@@ -13,4 +13,3 @@
 .\_build\system_nrf52.o: F:\Soft-Setup2017\Keilv5\ARM\PACK\NordicSemiconductor\nRF_DeviceFamilyPack\8.14.1\Device\Include\nrf51_to_nrf52.h
 .\_build\system_nrf52.o: F:\Soft-Setup2017\Keilv5\ARM\PACK\NordicSemiconductor\nRF_DeviceFamilyPack\8.14.1\Device\Include\nrf52_name_change.h
 .\_build\system_nrf52.o: F:\Soft-Setup2017\Keilv5\ARM\PACK\NordicSemiconductor\nRF_DeviceFamilyPack\8.14.1\Device\Include\compiler_abstraction.h
-.\_build\system_nrf52.o: ..\..\..\..\..\..\components\toolchain\system_nrf52.h
